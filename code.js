@@ -1,32 +1,17 @@
 var wifi = require("Wifi");
 var http = require("http");
 var mqtt = require("tinyMQTT").create("peatechen.club");
-
 // 温度传感器
-
-/*var ow = new OneWire(NodeMCU.D3);
-var sensor = require("DS18B20").connect(ow);
-setInterval(function() {
-  sensor.getTemp(function (temp) {
-    console.log("Temp is "+temp+"°C");
-  });
-}, 5000);*/
+//let ow = new OneWire(NodeMCU.D2);
+//let sensor = require("DS18B20").connect(ow);
 let Interval_1 = null;
-
-mqtt.on("disconnected", function(){
-    console.log("disconnected");
-    clearInterval(Interval_1);
-    mqtt.connect();
-});
+let Interval_2 = null;
+let Interval_3 = null;
 
 // 连接热点函数
 function connectTo(Ap,Passwd){
   wifi.connect(Ap, {password: Passwd},
    function(err){if(err)console.log(err);else{
-    // 成功连接路由器
-    console.log("connected!");
-    digitalWrite(NodeMCU.D0,0);
-    mqtt.connect();
   }
   });
 }
@@ -71,6 +56,17 @@ function pageRequest(req, res) {
 };
 
 function onInit(){
+  wifi.on('connected',()=>{
+    // 成功连接路由器
+    console.log("connected!");
+    mqtt.connect();
+    wifi.save();
+  });
+
+  wifi.on("disconnected",()=>{
+    clearInterval(Interval_1);
+  });
+
   // 开启一个 AP
   wifi.startAP('Esp8266AP', { password: 'peatechen', authMode: 'wpa2' }, function(err) {
     if (err) throw err;
@@ -78,31 +74,69 @@ function onInit(){
       // 建立服务
       var server = http.createServer(pageRequest);
       server.listen(80);
-    
       // mqtt 连接上后
       mqtt.on("connected", function(){
-          Interval_1 = setInterval(function() {
-            console.log(analogRead(A0));
-          }, 5000);
-          mqtt.subscribe("1",{qos:1}); // 开灯
-          mqtt.subscribe("2",{qos:1}); // 关灯
+          let temperature;
+          let humidity;
+          clearInterval(Interval_1);
+          Interval_1=setInterval(function() {
+            //sensor.getTemp(function (temp) {
+            //  temperature = temp;
+            //});
+            humidity = analogRead(A0)
+            let msg = {
+              Humidity: humidity,
+              Temperature: temperature
+            };
+            mqtt.publish("h",JSON.stringify(msg), { qos: 0, retain: true });
+            if(humidity>0.7){
+              digitalWrite(NodeMCU.D0,0);
+              mqtt.publish("a","1",{qos:0,retain:true});
+              clearInterval(Interval_3);
+              Interval_3=setInterval(function() {
+                if(analogRead(A0)<0.45){
+                  digitalWrite(NodeMCU.D0,1);
+                  clearInterval(Interval_3);
+                }
+              },3000);
+            }
+          }, 1800000);
           mqtt.subscribe("3",{qos:1}); // 开泵
           mqtt.subscribe("4",{qos:1}); // 关泵
       });
-    
+
+      mqtt.on("disconnected", function(){
+        console.log("disconnected");
+        clearInterval(Interval_1);
+        mqtt.connect();
+      });
+
       // 监听消息
       mqtt.on("message", function(msg){
         switch(msg.topic){
-          case "1" :digitalWrite(NodeMCU.D0,0);break;
-          case "2": digitalWrite(NodeMCU.D0,1);break;
-          case "3":digitalWrite(NodeMCU.D0,0);break;
-          case "4":digitalWrite(NodeMCU.D0,1);break;
+          case "3":{
+            digitalWrite(NodeMCU.D0,0);
+            mqtt.publish("a","1",{qos:0,retain:true});
+            clearInterval(Interval_2);
+            Interval_2=setInterval(function() {
+              if(analogRead(A0)<0.45){
+                digitalWrite(NodeMCU.D0,1);
+                clearInterval(Interval_2);
+              }
+          }, 3000);
+            break;
+          };
+          case "4":{
+            digitalWrite(NodeMCU.D0,1);
+            clearInterval(Interval_2);
+            break;
+          }
           default:break;
         };
       });
-  });
-  
+  }); 
 }
+
 save();
 
 
