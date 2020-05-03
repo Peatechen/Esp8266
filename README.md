@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-# Esp8266WiFi模块接入点及自身热点设置
-## 说明：本次Esp8266刷入的固件是Espruino,该固件采用javascript进行编码
-## 编写web页面设置Esp8266的接入点，以及修改Esp8266的热点名称和密码
-=======
-# Esp8266WiFi模块接入点及自身热点设置
-### 说明：本次Esp8266刷入的固件是Espruino,该固件采用javascript进行编码，编写一个web页面设置Esp8266的接入点，以及修改Esp8266的热点名称和密码。
+# NodeMcu 模块接入点及自身热点设置
+### 说明：本次 NodeMcu 刷入的固件是 Espruino,该固件采用 javascript 进行编码。编写一个 web 页面设置 Esp8266 的接入点。该代码主要配合作者使用微信小程序对其进行远程控制。
 
 - 复制源码到Espruino Web IDE中
-- 使用串口连接WiFi模块和电脑，点击Espruino Web IDE页面左上角黄色图标进行连接
+- 使用串口连接WiFi模块和电脑，点击 Espruino Web IDE 页面左上角黄色图标进行连接
 - 点击写入按钮
->>>>>>> 5df5003c86aef5cef5457c545381612abab6f399
+
+### 此段代码能够实现 NodeMcu 模块断电重起后自动重连，另外还在 NodeMcu 上运行 mqtt 客户端。手机连接好 NodeMcu 提供的 Wifi 热点（“ESP8266AP”）后，浏览器访问 “http://192.168.4.1” ，填写表单提交后进行入网。
