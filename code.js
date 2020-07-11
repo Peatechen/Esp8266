@@ -1,6 +1,6 @@
 var wifi = require("Wifi");
 var http = require("http");
-var mqtt = require("tinyMQTT").create("peatechen.club");
+var mqtt = require("tinyMQTT").create("xxx");
 // 温度传感器
 //let ow = new OneWire(NodeMCU.D2);
 //let sensor = require("DS18B20").connect(ow);
