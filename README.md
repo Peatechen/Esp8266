@@ -7,4 +7,4 @@
 
 ### 此段代码能够实现 NodeMcu 模块断电重起后自动重连，另外还在 NodeMcu 上运行 mqtt 客户端。手机连接好 NodeMcu 提供的 Wifi 热点（“ESP8266AP”）后，浏览器访问 “http://192.168.4.1” ，填写表单提交后进行入网。
 
-[linxianxi](https://github.com/linxianxi)
+@[linxianxi](https://github.com/linxianxi)
